@@ -1,23 +1,13 @@
 integer = @{ ASCII_DIGIT+ }
 atom = _{ integer }
 
-identifier = { !keywords ~ ASCII_ALPHA+ }
-
-EOS = _{ ";" }
-keywords = _{ let }
-  let = { "let" }
-
 bin_op = _{ add | subtract | multiply | divide }
     add = { "+" }
     subtract = { "-" }
     multiply = { "*" }
     divide = { "/" }
 
-expr = _{ math_op | atom }
-  math_op = { (atom ~ bin_op ~ expr)+ }
-
-statement = _{ (let_statement | expr) }
-  let_statement = { let ~ identifier ~ "=" ~ expr ~ EOS}
+expr = { atom ~ (bin_op ~ atom)* }
 
 WHITESPACE = _{ " " }
 
