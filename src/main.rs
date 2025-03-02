@@ -1,3 +1,4 @@
+use pest::iterators::Pairs;
 use pest::pratt_parser::PrattParser;
 use pest::Parser;
 use pest_derive::Parser;
@@ -45,19 +46,23 @@ enum BooleanOperator {
     LessThanEqual,
 }
 
-fn parse_program(program_input: &str) -> Expression {
-    let mut pairs = GrammarParser::parse(Rule::program, program_input).unwrap();
+fn parse_program(pairs: Pairs<Rule>) -> Expression {
     use pest::pratt_parser::{Assoc::*, Op};
 
     let parser = PrattParser::new()
-        .op(Op::infix(Rule::eq, Left) | Op::infix(Rule::gt, Left))
         .op(Op::infix(Rule::add, Left) | Op::infix(Rule::subtract, Left))
-        .op(Op::infix(Rule::multiply, Left) | Op::infix(Rule::divide, Left));
+        .op(Op::infix(Rule::multiply, Left) | Op::infix(Rule::divide, Left))
+        .op(Op::infix(Rule::eq, Left)
+            | Op::infix(Rule::gt, Left)
+            | Op::infix(Rule::ge, Left)
+            | Op::infix(Rule::lt, Left)
+            | Op::infix(Rule::le, Left));
 
     let result = parser
         .map_primary(|primary| match primary.as_rule() {
             Rule::integer => Expression::Integer(primary.as_str().parse().unwrap()),
             Rule::boolean => Expression::Boolean(primary.as_str() == "true"),
+            Rule::math_op => parse_program(primary.into_inner()),
             rule => unreachable!("Expected atomic rule found: {:?}", rule),
         })
         .map_infix(|lhs, op, rhs| {
@@ -86,7 +91,7 @@ fn parse_program(program_input: &str) -> Expression {
                 },
             }
         })
-        .parse(pairs.next().unwrap().into_inner());
+        .parse(pairs);
 
     result
 }
@@ -98,7 +103,7 @@ fn interp_program(expr: Expression) -> i32 {
         Expression::MathOp { lhs, op, rhs } => {
             let left = interp_program(*lhs);
             let right = interp_program(*rhs);
-            println!("left: {}, right: {}", left, right);
+
             match op {
                 MathOperator::Add => left + right,
                 MathOperator::Subtract => left - right,
@@ -122,7 +127,15 @@ fn interp_program(expr: Expression) -> i32 {
 }
 
 fn main() {
-    let program = parse_program("true == true");
-    let result = interp_program(program);
-    println!("Result: {}", result);
+    let program_input = "1 + 1 == 2";
+    match GrammarParser::parse(Rule::program, program_input) {
+        Ok(mut pairs) => {
+            let program = parse_program(pairs.next().unwrap().into_inner());
+            let result = interp_program(program);
+            println!("Result: {}", result);
+        }
+        Err(e) => {
+            println!("Program Parse Error: {}", e);
+        }
+    }
 }
