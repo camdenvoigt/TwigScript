@@ -50,13 +50,13 @@ fn parse_program(pairs: Pairs<Rule>) -> Expression {
     use pest::pratt_parser::{Assoc::*, Op};
 
     let parser = PrattParser::new()
-        .op(Op::infix(Rule::add, Left) | Op::infix(Rule::subtract, Left))
-        .op(Op::infix(Rule::multiply, Left) | Op::infix(Rule::divide, Left))
         .op(Op::infix(Rule::eq, Left)
             | Op::infix(Rule::gt, Left)
             | Op::infix(Rule::ge, Left)
             | Op::infix(Rule::lt, Left)
-            | Op::infix(Rule::le, Left));
+            | Op::infix(Rule::le, Left))
+        .op(Op::infix(Rule::add, Left) | Op::infix(Rule::subtract, Left))
+        .op(Op::infix(Rule::multiply, Left) | Op::infix(Rule::divide, Left));
 
     let result = parser
         .map_primary(|primary| match primary.as_rule() {
@@ -127,7 +127,7 @@ fn interp_program(expr: Expression) -> i32 {
 }
 
 fn main() {
-    let program_input = "1 + 1 == 2";
+    let program_input = "3 < 2";
     match GrammarParser::parse(Rule::program, program_input) {
         Ok(mut pairs) => {
             let program = parse_program(pairs.next().unwrap().into_inner());

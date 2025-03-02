@@ -8,7 +8,7 @@ bin_op = _{ add | subtract | multiply | divide }
     multiply = { "*" }
     divide = { "/" }
 
-bool_op = _{ eq | gt | ge | lt | le }
+bool_op = _{ eq | ge | le | gt | lt }
     eq = { "==" }
     gt = { ">" }
     ge = { ">=" }
@@ -17,7 +17,7 @@ bool_op = _{ eq | gt | ge | lt | le }
 
 expr = _{ boolean_op | math_op }
   math_op = { integer ~ (bin_op ~ integer)* } 
-  boolean_op = { (atom ~ bool_op ~ atom) }
+  boolean_op = { atom ~ bool_op ~ atom }
 
 WHITESPACE = _{ " " }
 
