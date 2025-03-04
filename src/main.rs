@@ -1,3 +1,4 @@
+use core::fmt;
 use pest::iterators::Pairs;
 use pest::pratt_parser::PrattParser;
 use pest::Parser;
@@ -45,6 +46,29 @@ enum BooleanOperator {
     LessThan,
     LessThanEqual,
 }
+
+#[derive(Debug)]
+enum Types {
+    Integer(i32),
+    Boolean(bool),
+}
+
+#[derive(Debug)]
+enum InterpErrors {
+    MismatchedTypeError,
+    InvalidTypeError,
+}
+
+impl fmt::Display for InterpErrors {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            InterpErrors::MismatchedTypeError => write!(f, "Mismatched types"),
+            InterpErrors::InvalidTypeError => write!(f, "InvalidTypeError"),
+        }
+    }
+}
+
+impl std::error::Error for InterpErrors {}
 
 fn parse_program(pairs: Pairs<Rule>) -> Expression {
     use pest::pratt_parser::{Assoc::*, Op};
@@ -96,43 +120,61 @@ fn parse_program(pairs: Pairs<Rule>) -> Expression {
     result
 }
 
-fn interp_program(expr: Expression) -> i32 {
+fn interp_program(expr: Expression) -> std::result::Result<Types, InterpErrors> {
     match expr {
-        Expression::Integer(value) => value,
-        Expression::Boolean(value) => value as i32,
+        Expression::Integer(value) => Ok(Types::Integer(value)),
+        Expression::Boolean(value) => Ok(Types::Boolean(value)),
         Expression::MathOp { lhs, op, rhs } => {
-            let left = interp_program(*lhs);
-            let right = interp_program(*rhs);
+            let (Ok(Types::Integer(left)), Ok(Types::Integer(right))) =
+                (interp_program(*lhs), interp_program(*rhs))
+            else {
+                return Err(InterpErrors::InvalidTypeError);
+            };
 
-            match op {
+            let result = match op {
                 MathOperator::Add => left + right,
                 MathOperator::Subtract => left - right,
                 MathOperator::Multiply => left * right,
                 MathOperator::Divide => left / right,
-            }
+            };
+
+            Ok(Types::Integer(result))
         }
         Expression::BooleanOp { lhs, op, rhs } => {
-            let left = interp_program(*lhs);
-            let right = interp_program(*rhs);
+            let (Ok(l), Ok(r)) = (interp_program(*lhs), interp_program(*rhs)) else {
+                return Err(InterpErrors::InvalidTypeError);
+            };
 
-            match op {
-                BooleanOperator::Eqaul => (left == right) as i32,
-                BooleanOperator::GreaterThan => (left > right) as i32,
-                BooleanOperator::GreaterThanEqual => (left >= right) as i32,
-                BooleanOperator::LessThan => (left < right) as i32,
-                BooleanOperator::LessThanEqual => (left <= right) as i32,
-            }
+            let (left, right) = match (l, r) {
+                (Types::Integer(i), Types::Integer(j)) => (i, j),
+                (Types::Boolean(i), Types::Boolean(j)) => (i as i32, j as i32),
+                _ => return Err(InterpErrors::MismatchedTypeError),
+            };
+
+            let result = match op {
+                BooleanOperator::Eqaul => left == right,
+                BooleanOperator::GreaterThan => left > right,
+                BooleanOperator::GreaterThanEqual => left >= right,
+                BooleanOperator::LessThan => left < right,
+                BooleanOperator::LessThanEqual => left <= right,
+            };
+
+            Ok(Types::Boolean(result))
         }
     }
 }
 
 fn main() {
-    let program_input = "3 < 2";
+    let program_input = "false > true";
     match GrammarParser::parse(Rule::program, program_input) {
         Ok(mut pairs) => {
             let program = parse_program(pairs.next().unwrap().into_inner());
             let result = interp_program(program);
-            println!("Result: {}", result);
+            match result {
+                Ok(Types::Integer(i)) => println!("Integer Result: {}", i),
+                Ok(Types::Boolean(b)) => println!("Boolean Result: {}", b),
+                Err(e) => println!("{}", e),
+            }
         }
         Err(e) => {
             println!("Program Parse Error: {}", e);
