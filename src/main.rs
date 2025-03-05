@@ -2,6 +2,7 @@ use crate::twig_interp::{interp_program, Types};
 use crate::twig_parser::parse_program;
 use pest::Parser;
 use pest_derive::Parser;
+use std::io::{self, BufRead, Write};
 
 pub mod twig_interp;
 pub mod twig_parser;
@@ -10,8 +11,7 @@ pub mod twig_parser;
 #[grammar = "grammars/grammar.pest"]
 pub struct GrammarParser;
 
-fn main() {
-    let program_input = "false > true";
+fn run_input(program_input: &str) {
     match GrammarParser::parse(Rule::program, program_input) {
         Ok(mut pairs) => {
             let program = parse_program(pairs.next().unwrap().into_inner());
@@ -25,5 +25,12 @@ fn main() {
         Err(e) => {
             println!("Program Parse Error: {}", e);
         }
+    }
+}
+
+fn main() {
+    let stdin = io::stdin();
+    for line in stdin.lock().lines() {
+        run_input(line.unwrap().as_str());
     }
 }
