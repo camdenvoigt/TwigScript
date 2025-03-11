@@ -1,6 +1,6 @@
 integer = @{ ASCII_DIGIT+ }
 boolean = @{ "true" | "false" }
-atom = _{ integer | boolean | "("? ~ math_op ~ ")"? }
+atom = _{ "("? ~ math_op ~ ")"? | integer | boolean }
 
 bin_op = _{ add | subtract | multiply | divide }
     add = { "+" }
@@ -15,9 +15,9 @@ bool_op = _{ eq | ge | le | gt | lt }
     lt = { "<" }
     le = { "<=" }
 
-expr = _{ boolean_op | math_op }
+expr = _{ boolean_op }
   math_op = { integer ~ (bin_op ~ integer)* } 
-  boolean_op = { atom ~ bool_op ~ atom }
+  boolean_op = { atom ~ (bool_op ~ atom)* }
 
 WHITESPACE = _{ " " }
 

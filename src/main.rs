@@ -2,7 +2,7 @@ use crate::twig_interp::{interp_program, Types};
 use crate::twig_parser::parse_program;
 use pest::Parser;
 use pest_derive::Parser;
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead};
 
 pub mod twig_interp;
 pub mod twig_parser;
