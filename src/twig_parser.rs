@@ -6,6 +6,7 @@ use pest::pratt_parser::PrattParser;
 pub enum Expression {
     Integer(i32),
     Boolean(bool),
+    Identifier(String),
     MathOp {
         lhs: Box<Expression>,
         op: MathOperator,
@@ -62,10 +63,19 @@ pub fn parse_program(pairs: Pairs<Rule>) -> Expression {
             Rule::integer => Expression::Integer(primary.as_str().parse().unwrap()),
             Rule::boolean => Expression::Boolean(primary.as_str() == "true"),
             Rule::math_op => parse_program(primary.into_inner()),
-            Rule::let_stmt => Expression::LetStmt {
-                identifier: Box::new(String::from(primary.into_inner().next().unwrap().as_str())),
-                value: Box::new(parse_program(primary.into_inner())),
-            },
+            Rule::boolean_op => parse_program(primary.into_inner()),
+            Rule::id_stmt => {
+                Expression::Identifier(String::from(primary.into_inner().next().unwrap().as_str()))
+            }
+            Rule::let_stmt => {
+                let mut inner = primary.into_inner();
+                let next = inner.next().unwrap().as_str();
+                Expression::LetStmt {
+                    identifier: Box::new(String::from(next)),
+                    value: Box::new(parse_program(inner)),
+                }
+            }
+
             rule => unreachable!("Expected atomic rule found: {:?}", rule),
         })
         .map_infix(|lhs, op, rhs| {

@@ -1,37 +1,43 @@
 use core::fmt;
+use std::{collections::BTreeMap, ops::Deref};
 
-use crate::twig_parser::{BooleanOperator, Expression, MathOperator};
+use crate::twig_parser::{parse_program, BooleanOperator, Expression, MathOperator};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Types {
     Integer(i32),
     Boolean(bool),
+    Unit,
 }
 
 #[derive(Debug)]
 pub enum InterpErrors {
     MismatchedTypeError,
     InvalidTypeError,
+    VariableDoesNotExist,
 }
+
+pub type Env = BTreeMap<Box<String>, Box<Types>>;
 
 impl fmt::Display for InterpErrors {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             InterpErrors::MismatchedTypeError => write!(f, "Mismatched types"),
             InterpErrors::InvalidTypeError => write!(f, "InvalidTypeError"),
+            InterpErrors::VariableDoesNotExist => write!(f, "Variable does not exist"),
         }
     }
 }
 
 impl std::error::Error for InterpErrors {}
 
-pub fn interp_program(expr: Expression) -> std::result::Result<Types, InterpErrors> {
+pub fn interp_program(expr: Expression, env: &mut Env) -> std::result::Result<Types, InterpErrors> {
     match expr {
         Expression::Integer(value) => Ok(Types::Integer(value)),
         Expression::Boolean(value) => Ok(Types::Boolean(value)),
         Expression::MathOp { lhs, op, rhs } => {
             let (Ok(Types::Integer(left)), Ok(Types::Integer(right))) =
-                (interp_program(*lhs), interp_program(*rhs))
+                (interp_program(*lhs, env), interp_program(*rhs, env))
             else {
                 return Err(InterpErrors::InvalidTypeError);
             };
@@ -46,7 +52,7 @@ pub fn interp_program(expr: Expression) -> std::result::Result<Types, InterpErro
             Ok(Types::Integer(result))
         }
         Expression::BooleanOp { lhs, op, rhs } => {
-            let (Ok(l), Ok(r)) = (interp_program(*lhs), interp_program(*rhs)) else {
+            let (Ok(l), Ok(r)) = (interp_program(*lhs, env), interp_program(*rhs, env)) else {
                 return Err(InterpErrors::InvalidTypeError);
             };
 
@@ -66,5 +72,16 @@ pub fn interp_program(expr: Expression) -> std::result::Result<Types, InterpErro
 
             Ok(Types::Boolean(result))
         }
+        Expression::LetStmt { identifier, value } => match interp_program(*value, env) {
+            Ok(result) => {
+                env.insert(identifier, Box::new(result));
+                Ok(Types::Unit)
+            }
+            Err(e) => Err(e),
+        },
+        Expression::Identifier(var) => match env.get(&var) {
+            Some(value) => Ok(**value),
+            None => Err(InterpErrors::VariableDoesNotExist),
+        },
     }
 }

@@ -1,7 +1,7 @@
 integer = @{ ASCII_DIGIT+ }
 boolean = @{ "true" | "false" }
 identifier = @{ ASCII_ALPHA }
-atom = _{ "("? ~ math_op ~ ")"? | integer | boolean }
+atom = _{ "("? ~ math_op ~ ")"? | boolean | integer | identifier }
 
 bin_op = _{ add | subtract | multiply | divide }
     add = { "+" }
@@ -20,7 +20,8 @@ expr = _{ boolean_op }
   math_op = { integer ~ (bin_op ~ integer)* } 
   boolean_op = { atom ~ (bool_op ~ atom)* }
 
-stmt = _{ let_stmt }
+stmt = { let_stmt | id_stmt | expr }
+  id_stmt = { identifier }
   let_stmt = { "let" ~ identifier ~ "=" ~ expr } 
 
 WHITESPACE = _{ " " }
