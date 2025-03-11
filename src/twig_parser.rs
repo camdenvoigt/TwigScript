@@ -16,6 +16,10 @@ pub enum Expression {
         op: BooleanOperator,
         rhs: Box<Expression>,
     },
+    LetStmt {
+        identifier: Box<String>,
+        value: Box<Expression>,
+    },
 }
 
 #[derive(Debug)]
@@ -58,6 +62,10 @@ pub fn parse_program(pairs: Pairs<Rule>) -> Expression {
             Rule::integer => Expression::Integer(primary.as_str().parse().unwrap()),
             Rule::boolean => Expression::Boolean(primary.as_str() == "true"),
             Rule::math_op => parse_program(primary.into_inner()),
+            Rule::let_stmt => Expression::LetStmt {
+                identifier: Box::new(String::from(primary.into_inner().next().unwrap().as_str())),
+                value: Box::new(parse_program(primary.into_inner())),
+            },
             rule => unreachable!("Expected atomic rule found: {:?}", rule),
         })
         .map_infix(|lhs, op, rhs| {

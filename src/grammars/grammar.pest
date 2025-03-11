@@ -1,5 +1,6 @@
 integer = @{ ASCII_DIGIT+ }
 boolean = @{ "true" | "false" }
+identifier = @{ ASCII_ALPHA }
 atom = _{ "("? ~ math_op ~ ")"? | integer | boolean }
 
 bin_op = _{ add | subtract | multiply | divide }
@@ -19,6 +20,9 @@ expr = _{ boolean_op }
   math_op = { integer ~ (bin_op ~ integer)* } 
   boolean_op = { atom ~ (bool_op ~ atom)* }
 
+stmt = _{ let_stmt }
+  let_stmt = { "let" ~ identifier ~ "=" ~ expr } 
+
 WHITESPACE = _{ " " }
 
-program = _{ SOI ~ expr ~ EOI }
+program = _{ SOI ~ stmt ~ EOI }
