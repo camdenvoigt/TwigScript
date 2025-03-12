@@ -62,11 +62,9 @@ pub fn parse_program(pairs: Pairs<Rule>) -> Expression {
         .map_primary(|primary| match primary.as_rule() {
             Rule::integer => Expression::Integer(primary.as_str().parse().unwrap()),
             Rule::boolean => Expression::Boolean(primary.as_str() == "true"),
-            Rule::math_op => parse_program(primary.into_inner()),
-            Rule::boolean_op => parse_program(primary.into_inner()),
-            Rule::id_stmt => {
-                Expression::Identifier(String::from(primary.into_inner().next().unwrap().as_str()))
-            }
+            Rule::math_operation => parse_program(primary.into_inner()),
+            Rule::boolean_operation => parse_program(primary.into_inner()),
+            Rule::identifier => Expression::Identifier(String::from(primary.as_str())),
             Rule::let_stmt => {
                 let mut inner = primary.into_inner();
                 let next = inner.next().unwrap().as_str();

@@ -1,7 +1,7 @@
 use core::fmt;
-use std::{collections::BTreeMap, ops::Deref};
+use std::collections::BTreeMap;
 
-use crate::twig_parser::{parse_program, BooleanOperator, Expression, MathOperator};
+use crate::twig_parser::{BooleanOperator, Expression, MathOperator};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Types {

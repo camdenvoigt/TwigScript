@@ -1,27 +1,29 @@
 integer = @{ ASCII_DIGIT+ }
 boolean = @{ "true" | "false" }
-identifier = @{ ASCII_ALPHA }
-atom = _{ "("? ~ math_op ~ ")"? | boolean | integer | identifier }
+keywords = _{"true" | "false" | "let"}
+identifier = @{ !keywords ~ ASCII_ALPHA+ }
 
-bin_op = _{ add | subtract | multiply | divide }
+math_operand = _{ integer | identifier }
+boolean_operand = _{ boolean | "("? ~ math_operation ~ ")"? }
+
+math_operator = _{ add | subtract | multiply | divide }
     add = { "+" }
     subtract = { "-" }
     multiply = { "*" }
     divide = { "/" }
 
-bool_op = _{ eq | ge | le | gt | lt }
+boolean_operator = _{ eq | ge | le | gt | lt }
     eq = { "==" }
     gt = { ">" }
     ge = { ">=" }
     lt = { "<" }
     le = { "<=" }
 
-expr = _{ boolean_op }
-  math_op = { integer ~ (bin_op ~ integer)* } 
-  boolean_op = { atom ~ (bool_op ~ atom)* }
+expr = _{ boolean_operation | math_operation }
+  math_operation = { math_operand ~ (math_operator ~ math_operand)* } 
+  boolean_operation = { boolean_operand ~ (boolean_operator ~ boolean_operand)* }
 
-stmt = { let_stmt | id_stmt | expr }
-  id_stmt = { identifier }
+stmt = { let_stmt | expr }
   let_stmt = { "let" ~ identifier ~ "=" ~ expr } 
 
 WHITESPACE = _{ " " }
