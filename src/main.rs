@@ -40,7 +40,11 @@ fn main() {
     let mut env = Env::new();
     write_indicator();
     for line in stdin.lock().lines() {
-        run_input(line.unwrap().as_str(), &mut env);
+        let l = line.unwrap();
+        if l == "exit" {
+            std::process::exit(1);
+        }
+        run_input(l.as_str(), &mut env);
         write_indicator();
     }
 }
