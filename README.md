@@ -34,10 +34,13 @@ After running the Twigscript interpretor you will be shown a prompt symbol `>` a
 ### How was testing done
 
 ### What worked?
+Honestly, most of what I tried worked. I especially liked using rust Enum types and match statements. They work really well for a problem like this. The enum types just really felt like a natural way to express an AST and then parse an AST. 
 
 ### What didn't work?
+Using a 3rd party parser was tough. It was hard to get exactly what I wanted how I wanted it. It did help simplify the problem, but a lot of my debugging time was working with the grammar to make sure things were parsed the way I wanted rather than solving the problems.
 
 ### What would I change in the future?
+So much. I would love to add all the basic programming language stuff. Control flow like loops and ifs. I'd love to add simple javascript like objects. For changes to existing code. Right now all variables are stored on the heap, even simple ones and I'd like to find a way to change that. Part of the problem is currently there is no real idea of a stack right now.
 
 
 ## License Info
