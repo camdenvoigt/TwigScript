@@ -2,7 +2,7 @@ use crate::twig_interp::{interp_program, Env, Types};
 use crate::twig_parser::parse_program;
 use pest::Parser;
 use pest_derive::Parser;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write};
 
 pub mod twig_interp;
 pub mod twig_parser;
@@ -30,10 +30,17 @@ fn run_input(program_input: &str, env: &mut Env) {
     }
 }
 
+fn write_indicator() {
+    io::stdout().write(b"> ").unwrap();
+    io::stdout().flush().unwrap();
+}
+
 fn main() {
     let stdin = io::stdin();
     let mut env = Env::new();
+    write_indicator();
     for line in stdin.lock().lines() {
         run_input(line.unwrap().as_str(), &mut env);
+        write_indicator();
     }
 }
