@@ -19,6 +19,7 @@ fn run_input(program_input: &str, env: &mut Env) {
             match result {
                 Ok(Types::Integer(i)) => println!("Integer Result: {}", i),
                 Ok(Types::Boolean(b)) => println!("Boolean Result: {}", b),
+                Ok(Types::String(s)) => println!("String Result: {}", s),
                 Ok(Types::Unit) => println!("Unit Result"),
                 Err(e) => println!("{}", e),
             }

@@ -3,6 +3,10 @@ boolean = @{ "true" | "false" }
 keywords = _{"true" | "false" | "let"}
 identifier = @{ !keywords ~ ASCII_ALPHA+ }
 
+string_literal = _{ string_identifier ~ string ~ string_identifier }
+	string_identifier = _{ "\u{0022}" }
+  string = { ASCII_ALPHA* }
+
 math_operand = _{ integer | identifier }
 boolean_operand = _{ boolean | "("? ~ math_operation ~ ")"? }
 
@@ -19,7 +23,7 @@ boolean_operator = _{ eq | ge | le | gt | lt }
     lt = { "<" }
     le = { "<=" }
 
-expr = _{ boolean_operation | math_operation }
+expr = _{ boolean_operation | math_operation | string_literal }
   math_operation = { math_operand ~ (math_operator ~ math_operand)* } 
   boolean_operation = { boolean_operand ~ (boolean_operator ~ boolean_operand)* }
 

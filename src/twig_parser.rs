@@ -6,6 +6,7 @@ use pest::pratt_parser::PrattParser;
 pub enum Expression {
     Integer(i32),
     Boolean(bool),
+    String(String),
     Identifier(String),
     MathOp {
         lhs: Box<Expression>,
@@ -18,7 +19,7 @@ pub enum Expression {
         rhs: Box<Expression>,
     },
     LetStmt {
-        identifier: Box<String>,
+        identifier: String,
         value: Box<Expression>,
     },
 }
@@ -62,6 +63,7 @@ pub fn parse_program(pairs: Pairs<Rule>) -> Expression {
         .map_primary(|primary| match primary.as_rule() {
             Rule::integer => Expression::Integer(primary.as_str().parse().unwrap()),
             Rule::boolean => Expression::Boolean(primary.as_str() == "true"),
+            Rule::string => Expression::String(String::from(primary.as_str())),
             Rule::math_operation => parse_program(primary.into_inner()),
             Rule::boolean_operation => parse_program(primary.into_inner()),
             Rule::identifier => Expression::Identifier(String::from(primary.as_str())),
@@ -69,7 +71,7 @@ pub fn parse_program(pairs: Pairs<Rule>) -> Expression {
                 let mut inner = primary.into_inner();
                 let next = inner.next().unwrap().as_str();
                 Expression::LetStmt {
-                    identifier: Box::new(String::from(next)),
+                    identifier: String::from(next),
                     value: Box::new(parse_program(inner)),
                 }
             }

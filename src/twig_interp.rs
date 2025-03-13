@@ -3,10 +3,11 @@ use std::collections::BTreeMap;
 
 use crate::twig_parser::{BooleanOperator, Expression, MathOperator};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum Types {
     Integer(i32),
     Boolean(bool),
+    String(String),
     Unit,
 }
 
@@ -17,7 +18,7 @@ pub enum InterpErrors {
     VariableDoesNotExist,
 }
 
-pub type Env = BTreeMap<Box<String>, Box<Types>>;
+pub type Env = BTreeMap<String, Box<Types>>;
 
 impl fmt::Display for InterpErrors {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -35,6 +36,7 @@ pub fn interp_program(expr: Expression, env: &mut Env) -> std::result::Result<Ty
     match expr {
         Expression::Integer(value) => Ok(Types::Integer(value)),
         Expression::Boolean(value) => Ok(Types::Boolean(value)),
+        Expression::String(value) => Ok(Types::String(value)),
         Expression::MathOp { lhs, op, rhs } => {
             let (Ok(Types::Integer(left)), Ok(Types::Integer(right))) =
                 (interp_program(*lhs, env), interp_program(*rhs, env))
@@ -59,6 +61,7 @@ pub fn interp_program(expr: Expression, env: &mut Env) -> std::result::Result<Ty
             let (left, right) = match (l, r) {
                 (Types::Integer(i), Types::Integer(j)) => (i, j),
                 (Types::Boolean(i), Types::Boolean(j)) => (i as i32, j as i32),
+                (Types::String(_), Types::String(_)) => return Err(InterpErrors::InvalidTypeError),
                 _ => return Err(InterpErrors::MismatchedTypeError),
             };
 
@@ -80,7 +83,9 @@ pub fn interp_program(expr: Expression, env: &mut Env) -> std::result::Result<Ty
             Err(e) => Err(e),
         },
         Expression::Identifier(var) => match env.get(&var) {
-            Some(value) => Ok(**value),
+            // Need to do bit of a strange dereference here to get Types out of Box. Clone to get a
+            // copy of the value in env.
+            Some(value) => Ok(*(*value).clone()),
             None => Err(InterpErrors::VariableDoesNotExist),
         },
     }
