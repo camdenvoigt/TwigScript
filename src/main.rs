@@ -31,7 +31,7 @@ fn run_input(program_input: &str, env: &mut Env) {
 }
 
 fn write_indicator() {
-    io::stdout().write(b"> ").unwrap();
+    io::stdout().write_all(b"> ").unwrap();
     io::stdout().flush().unwrap();
 }
 
