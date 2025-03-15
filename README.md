@@ -47,3 +47,30 @@ Also, if I got to do a full rewrite I would probably not specify my parser in PE
 
 ## License Info
 Licensed under MIT/Apache
+
+## Bibliography
+### basic
+  - Rust Programming Docs (https://doc.rust-lang.org/std/index.html)
+  - Rust Programming Book (https://doc.rust-lang.org/book/title-page.html)
+  - Programming Rust (Jim Blandy)
+  - Pest Docs (https://docs.rs/pest/latest/pest/index.html)
+  - Pest Book (https://pest.rs/book/intro.html)
+  - Simple but Powerful Pratt Parsing (https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html)
+
+### Stack Overflow
+- https://stackoverflow.com/questions/53124930/how-do-you-test-for-a-specific-rust-error/53124931#53124931
+- https://stackoverflow.com/questions/25106554/why-doesnt-println-work-in-rust-unit-tests
+- https://stackoverflow.com/questions/22355273/writing-to-a-file-or-stdout-in-rust
+- https://stackoverflow.com/questions/30416320/why-is-a-lifetime-needed-when-implementing-a-trait-on-a-reference-type-if-the-li
+- https://stackoverflow.com/questions/9109872/how-do-you-access-enum-values-in-rust
+- https://stackoverflow.com/questions/13579266/how-can-i-read-user-input-in-rust
+- https://stackoverflow.com/questions/55461617/how-do-i-convert-a-boolean-to-an-integer-in-rust
+
+### Reddit
+- https://www.reddit.com/r/rust/comments/gmjgr2/newbie_question_asserting_errors_in_rust/
+
+### Rust Forums
+- https://users.rust-lang.org/t/dereferencing-a-boxed-value/86768
+- https://users.rust-lang.org/t/is-the-lifetime-of-a-btreemap-get-result-attached-to-the-key-as-well-as-the-map/83568
+- https://users.rust-lang.org/t/cant-derive-copy-because-of-string/18665/4
+- https://users.rust-lang.org/t/why-cant-move-element-of-vector/30454
