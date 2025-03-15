@@ -30,7 +30,7 @@ enum Operator {
     Bool(BooleanOperator),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum MathOperator {
     Add,
     Subtract,
@@ -38,7 +38,7 @@ pub enum MathOperator {
     Divide,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum BooleanOperator {
     Eqaul,
     GreaterThan,
@@ -82,9 +82,9 @@ fn map_primary(primary: Pair<Rule>) -> Expression {
         Rule::integer => Expression::Integer(primary.as_str().parse().unwrap()),
         Rule::boolean => Expression::Boolean(primary.as_str() == "true"),
         Rule::string => Expression::String(String::from(primary.as_str())),
+        Rule::identifier => Expression::Identifier(String::from(primary.as_str())),
         Rule::math_operation => parse_program(primary.into_inner()),
         Rule::boolean_operation => parse_program(primary.into_inner()),
-        Rule::identifier => Expression::Identifier(String::from(primary.as_str())),
         Rule::let_stmt => {
             let mut inner = primary.into_inner();
             let next = inner.next().unwrap().as_str();
@@ -119,6 +119,7 @@ pub fn parse_program(pairs: Pairs<Rule>) -> Expression {
 #[cfg(test)]
 mod twig_parser_tests {
     use super::*;
+    use pest::{ParseResult, ParserState};
 
     #[test]
     fn test_get_operator_add() {
@@ -226,5 +227,113 @@ mod twig_parser_tests {
         let result = get_operator(pair);
 
         assert_eq!(result, Operator::Bool(BooleanOperator::LessThanEqual));
+    }
+
+    #[test]
+    fn test_get_operation_math() {
+        let op = MathOperator::Subtract;
+        let result = get_operation(
+            Expression::Integer(1),
+            Operator::Math(op),
+            Expression::Integer(1),
+        );
+
+        let expected = Expression::MathOp {
+            lhs: Box::new(Expression::Integer(1)),
+            op,
+            rhs: Box::new(Expression::Integer(1)),
+        };
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_get_operation_bool() {
+        let op = BooleanOperator::LessThan;
+        let result = get_operation(
+            Expression::Integer(1),
+            Operator::Bool(op),
+            Expression::Integer(1),
+        );
+
+        let expected = Expression::BooleanOp {
+            lhs: Box::new(Expression::Integer(1)),
+            op,
+            rhs: Box::new(Expression::Integer(1)),
+        };
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_primary_int() {
+        let input = "8";
+        let rule = Rule::integer;
+        fn parser_rules(state: Box<ParserState<Rule>>) -> ParseResult<Box<ParserState<Rule>>> {
+            state.match_string("8")
+        }
+        let pair = pest::state(input, |state| state.rule(rule, parser_rules))
+            .unwrap()
+            .next()
+            .unwrap();
+
+        let result = map_primary(pair);
+        let expected = Expression::Integer(8);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_primary_bool() {
+        let input = "true";
+        let rule = Rule::boolean;
+        fn parser_rules(state: Box<ParserState<Rule>>) -> ParseResult<Box<ParserState<Rule>>> {
+            state.match_string("true")
+        }
+        let pair = pest::state(input, |state| state.rule(rule, parser_rules))
+            .unwrap()
+            .next()
+            .unwrap();
+
+        let result = map_primary(pair);
+        let expected = Expression::Boolean(true);
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_primary_string() {
+        let input = "test";
+        let rule = Rule::string;
+        fn parser_rules(state: Box<ParserState<Rule>>) -> ParseResult<Box<ParserState<Rule>>> {
+            state.match_string("test")
+        }
+        let pair = pest::state(input, |state| state.rule(rule, parser_rules))
+            .unwrap()
+            .next()
+            .unwrap();
+
+        let result = map_primary(pair);
+        let expected = Expression::String(String::from("test"));
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_primary_id() {
+        let input = "test";
+        let rule = Rule::identifier;
+        fn parser_rules(state: Box<ParserState<Rule>>) -> ParseResult<Box<ParserState<Rule>>> {
+            state.match_string("test")
+        }
+        let pair = pest::state(input, |state| state.rule(rule, parser_rules))
+            .unwrap()
+            .next()
+            .unwrap();
+
+        let result = map_primary(pair);
+        let expected = Expression::Identifier(String::from("test"));
+
+        assert_eq!(result, expected);
     }
 }
