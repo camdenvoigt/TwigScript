@@ -32,6 +32,7 @@ After running the Twigscript interpretor you will be shown a prompt symbol `>` a
 ## Questions
 
 ### How was testing done
+There are unit tests to make sure the basic functionality works as expected. These could be even more though and probably should be as even basic functionality like `>=` needs to always work in a programming language. I also did a lot of manual testing running twigscript and writing programs.
 
 ### What worked?
 Honestly, most of what I tried worked. I especially liked using rust Enum types and match statements. They work really well for a problem like this. The enum types just really felt like a natural way to express an AST and then parse an AST. 
@@ -42,6 +43,7 @@ Using a 3rd party parser was tough. It was hard to get exactly what I wanted how
 ### What would I change in the future?
 So much. I would love to add all the basic programming language stuff. Control flow like loops and ifs. I'd love to add simple javascript like objects. For changes to existing code. Right now all variables are stored on the heap, even simple ones and I'd like to find a way to change that. Part of the problem is currently there is no real idea of a stack right now.
 
+Also, if I got to do a full rewrite I would probably not specify my parser in PEG. Near the end I discovered an example of how to write a pest parser without using the PEG to generate the rules. This looked a lot more flexible and easy to use as it would just be writing rust code.
 
 ## License Info
 Licensed under MIT/Apache
