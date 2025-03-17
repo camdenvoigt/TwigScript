@@ -1,4 +1,4 @@
-use crate::twig_interp::{interp_program, Env, Types};
+use crate::twig_interp::{Env, Types, interp_program};
 use crate::twig_parser::parse_program;
 use pest::Parser;
 use pest_derive::Parser;
